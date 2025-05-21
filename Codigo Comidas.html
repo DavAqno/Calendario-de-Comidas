@@ -1,0 +1,1958 @@
+<html lang="es"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planificador de Comidas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f8f9fa;
+        }
+        
+        .meal-card {
+            transition: all 0.3s ease;
+        }
+        
+        .meal-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        
+        .day-tab.active {
+            background-color: #4f46e5;
+            color: white;
+        }
+
+        .recipe-item {
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .recipe-item:hover {
+            background-color: #f3f4f6;
+        }
+
+        /* Estilos para la barra de desplazamiento */
+        .recipes-container::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .recipes-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        .recipes-container::-webkit-scrollbar-thumb {
+            background: #c7d2fe;
+            border-radius: 10px;
+        }
+        
+        .recipes-container::-webkit-scrollbar-thumb:hover {
+            background: #a5b4fc;
+        }
+
+        .calendar-meal {
+            border-left: 4px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .calendar-meal:hover {
+            background-color: #f3f4f6;
+        }
+
+        .calendar-meal.desayuno {
+            border-left-color: #fbbf24;
+        }
+
+        .calendar-meal.almuerzo {
+            border-left-color: #34d399;
+        }
+
+        .calendar-meal.cena {
+            border-left-color: #60a5fa;
+        }
+
+        .calendar-meal.merienda {
+            border-left-color: #f87171;
+        }
+
+        .view-toggle-btn {
+            transition: all 0.3s ease;
+        }
+
+        .view-toggle-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+        }
+
+        .calendar-header {
+            text-align: center;
+            padding: 10px;
+            font-weight: 600;
+            color: #4f46e5;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .calendar-day {
+            background-color: #f9fafb;
+            border-radius: 8px;
+            min-height: 200px;
+            padding: 10px;
+            border: 1px solid #e5e7eb;
+            transition: all 0.3s ease;
+        }
+
+        .calendar-day:hover {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .meal-type-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 6px;
+        }
+
+        .meal-type-desayuno {
+            background-color: #fbbf24;
+        }
+
+        .meal-type-almuerzo {
+            background-color: #34d399;
+        }
+
+        .meal-type-cena {
+            background-color: #60a5fa;
+        }
+
+        .meal-type-merienda {
+            background-color: #f87171;
+        }
+
+        .meal-legend {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            font-size: 0.875rem;
+        }
+    </style>
+<style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.16 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.container{width:100%}@media (min-width: 640px){.container{max-width:640px}}@media (min-width: 768px){.container{max-width:768px}}@media (min-width: 1024px){.container{max-width:1024px}}@media (min-width: 1280px){.container{max-width:1280px}}@media (min-width: 1536px){.container{max-width:1536px}}.fixed{position:fixed}.absolute{position:absolute}.relative{position:relative}.inset-0{inset:0px}.right-3{right:0.75rem}.top-2\.5{top:0.625rem}.z-50{z-index:50}.mx-auto{margin-left:auto;margin-right:auto}.mb-2{margin-bottom:0.5rem}.mb-3{margin-bottom:0.75rem}.mb-4{margin-bottom:1rem}.mb-6{margin-bottom:1.5rem}.mb-8{margin-bottom:2rem}.mr-2{margin-right:0.5rem}.mt-2{margin-top:0.5rem}.mt-4{margin-top:1rem}.mt-8{margin-top:2rem}.mt-1{margin-top:0.25rem}.mt-3{margin-top:0.75rem}.block{display:block}.flex{display:flex}.grid{display:grid}.hidden{display:none}.h-32{height:8rem}.h-5{height:1.25rem}.h-6{height:1.5rem}.h-full{height:100%}.h-4{height:1rem}.max-h-\[90vh\]{max-height:90vh}.min-h-screen{min-height:100vh}.w-5{width:1.25rem}.w-6{width:1.5rem}.w-full{width:100%}.w-4{width:1rem}.max-w-4xl{max-width:56rem}.flex-grow{flex-grow:1}.grid-cols-1{grid-template-columns:repeat(1, minmax(0, 1fr))}.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}.items-start{align-items:flex-start}.items-center{align-items:center}.justify-end{justify-content:flex-end}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-2{gap:0.5rem}.gap-6{gap:1.5rem}.space-y-2 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.5rem * var(--tw-space-y-reverse))}.space-y-1 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.25rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.25rem * var(--tw-space-y-reverse))}.divide-y > :not([hidden]) ~ :not([hidden]){--tw-divide-y-reverse:0;border-top-width:calc(1px * calc(1 - var(--tw-divide-y-reverse)));border-bottom-width:calc(1px * var(--tw-divide-y-reverse))}.divide-gray-200 > :not([hidden]) ~ :not([hidden]){--tw-divide-opacity:1;border-color:rgb(229 231 235 / var(--tw-divide-opacity, 1))}.overflow-hidden{overflow:hidden}.overflow-y-auto{overflow-y:auto}.rounded-lg{border-radius:0.5rem}.rounded-xl{border-radius:0.75rem}.rounded{border-radius:0.25rem}.rounded-full{border-radius:9999px}.rounded-l-lg{border-top-left-radius:0.5rem;border-bottom-left-radius:0.5rem}.rounded-r-lg{border-top-right-radius:0.5rem;border-bottom-right-radius:0.5rem}.border{border-width:1px}.border-gray-200{--tw-border-opacity:1;border-color:rgb(229 231 235 / var(--tw-border-opacity, 1))}.border-gray-300{--tw-border-opacity:1;border-color:rgb(209 213 219 / var(--tw-border-opacity, 1))}.bg-black{--tw-bg-opacity:1;background-color:rgb(0 0 0 / var(--tw-bg-opacity, 1))}.bg-gray-200{--tw-bg-opacity:1;background-color:rgb(229 231 235 / var(--tw-bg-opacity, 1))}.bg-gray-50{--tw-bg-opacity:1;background-color:rgb(249 250 251 / var(--tw-bg-opacity, 1))}.bg-indigo-600{--tw-bg-opacity:1;background-color:rgb(79 70 229 / var(--tw-bg-opacity, 1))}.bg-white{--tw-bg-opacity:1;background-color:rgb(255 255 255 / var(--tw-bg-opacity, 1))}.bg-green-100{--tw-bg-opacity:1;background-color:rgb(220 252 231 / var(--tw-bg-opacity, 1))}.bg-yellow-100{--tw-bg-opacity:1;background-color:rgb(254 249 195 / var(--tw-bg-opacity, 1))}.bg-blue-100{--tw-bg-opacity:1;background-color:rgb(219 234 254 / var(--tw-bg-opacity, 1))}.bg-opacity-50{--tw-bg-opacity:0.5}.bg-gradient-to-br{background-image:linear-gradient(to bottom right, var(--tw-gradient-stops))}.from-indigo-50{--tw-gradient-from:#eef2ff var(--tw-gradient-from-position);--tw-gradient-to:rgb(238 242 255 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.to-purple-50{--tw-gradient-to:#faf5ff var(--tw-gradient-to-position)}.p-2{padding:0.5rem}.p-4{padding:1rem}.p-6{padding:1.5rem}.p-5{padding:1.25rem}.px-4{padding-left:1rem;padding-right:1rem}.px-6{padding-left:1.5rem;padding-right:1.5rem}.py-2{padding-top:0.5rem;padding-bottom:0.5rem}.py-6{padding-top:1.5rem;padding-bottom:1.5rem}.py-8{padding-top:2rem;padding-bottom:2rem}.px-2\.5{padding-left:0.625rem;padding-right:0.625rem}.py-0\.5{padding-top:0.125rem;padding-bottom:0.125rem}.text-center{text-align:center}.text-2xl{font-size:1.5rem;line-height:2rem}.text-3xl{font-size:1.875rem;line-height:2.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:0.875rem;line-height:1.25rem}.text-xs{font-size:0.75rem;line-height:1rem}.font-bold{font-weight:700}.font-medium{font-weight:500}.font-semibold{font-weight:600}.text-gray-400{--tw-text-opacity:1;color:rgb(156 163 175 / var(--tw-text-opacity, 1))}.text-gray-500{--tw-text-opacity:1;color:rgb(107 114 128 / var(--tw-text-opacity, 1))}.text-gray-600{--tw-text-opacity:1;color:rgb(75 85 99 / var(--tw-text-opacity, 1))}.text-gray-700{--tw-text-opacity:1;color:rgb(55 65 81 / var(--tw-text-opacity, 1))}.text-gray-800{--tw-text-opacity:1;color:rgb(31 41 55 / var(--tw-text-opacity, 1))}.text-indigo-700{--tw-text-opacity:1;color:rgb(67 56 202 / var(--tw-text-opacity, 1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.text-green-800{--tw-text-opacity:1;color:rgb(22 101 52 / var(--tw-text-opacity, 1))}.text-indigo-500{--tw-text-opacity:1;color:rgb(99 102 241 / var(--tw-text-opacity, 1))}.text-indigo-600{--tw-text-opacity:1;color:rgb(79 70 229 / var(--tw-text-opacity, 1))}.text-yellow-800{--tw-text-opacity:1;color:rgb(133 77 14 / var(--tw-text-opacity, 1))}.text-blue-800{--tw-text-opacity:1;color:rgb(30 64 175 / var(--tw-text-opacity, 1))}.shadow-lg{--tw-shadow:0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 10px 15px -3px var(--tw-shadow-color), 0 4px 6px -4px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-md{--tw-shadow:0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 4px 6px -1px var(--tw-shadow-color), 0 2px 4px -2px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-sm{--tw-shadow:0 1px 2px 0 rgb(0 0 0 / 0.05);--tw-shadow-colored:0 1px 2px 0 var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.hover\:bg-indigo-700:hover{--tw-bg-opacity:1;background-color:rgb(67 56 202 / var(--tw-bg-opacity, 1))}.hover\:text-gray-700:hover{--tw-text-opacity:1;color:rgb(55 65 81 / var(--tw-text-opacity, 1))}.hover\:text-red-500:hover{--tw-text-opacity:1;color:rgb(239 68 68 / var(--tw-text-opacity, 1))}.focus\:outline-none:focus{outline:2px solid transparent;outline-offset:2px}.focus\:ring-2:focus{--tw-ring-offset-shadow:var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow:var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000)}.focus\:ring-indigo-500:focus{--tw-ring-opacity:1;--tw-ring-color:rgb(99 102 241 / var(--tw-ring-opacity, 1))}@media (min-width: 768px){.md\:w-1\/2{width:50%}.md\:grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}.md\:flex-row{flex-direction:row}}@media (min-width: 1024px){.lg\:grid-cols-3{grid-template-columns:repeat(3, minmax(0, 1fr))}}</style></head>
+<body>
+    <div class="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-50">
+        <header class="bg-white shadow-md">
+            <div class="container mx-auto px-4 py-6">
+                <h1 class="text-3xl font-bold text-center text-indigo-700">Planificador de Comidas Semanal</h1>
+                <p class="text-center text-gray-600 mt-2">Organiza tus comidas para una semana saludable</p>
+                <div class="flex justify-center mt-4">
+                    <button id="view-toggle-btn" class="view-toggle-btn bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
+                    </svg>
+                    Ver Vista Detallada
+                </button>
+                </div>
+            </div>
+        </header>
+        
+        <main class="container mx-auto px-4 py-8">
+            <!-- Vista detallada -->
+            <div id="detailed-view" class="hidden">
+                <!-- Tabs para los días de la semana -->
+                <div class="flex flex-wrap justify-center mb-8 gap-2">
+                    <button class="day-tab px-4 py-2 rounded-lg font-medium bg-gray-200" data-day="lunes">Lunes</button>
+                    <button class="day-tab px-4 py-2 rounded-lg font-medium bg-gray-200" data-day="martes">Martes</button>
+                    <button class="day-tab px-4 py-2 rounded-lg font-medium bg-gray-200" data-day="miercoles">Miércoles</button>
+                    <button class="day-tab px-4 py-2 rounded-lg font-medium bg-gray-200" data-day="jueves">Jueves</button>
+                    <button class="day-tab px-4 py-2 rounded-lg font-medium bg-gray-200" data-day="viernes">Viernes</button>
+                    <button class="day-tab px-4 py-2 rounded-lg font-medium bg-gray-200" data-day="sabado">Sábado</button>
+                    <button class="day-tab px-4 py-2 rounded-lg font-medium active" data-day="domingo">Domingo</button>
+                </div>
+                
+                <!-- Contenido de los días -->
+                <div id="day-content" class="bg-white rounded-xl shadow-lg p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800" id="current-day">Domingo</h2>
+                        <button id="add-meal-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd"></path>
+                            </svg>
+                            Añadir Comida
+                        </button>
+                    </div>
+                    
+                    <div id="meals-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"><div class="meal-card bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+                    <div class="p-5">
+                        <div class="flex justify-between items-start">
+                            <span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full flex items-center">
+                                🍽️ Almuerzo
+                            </span>
+                            <button class="delete-meal text-gray-400 hover:text-red-500" data-index="0">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                                </svg>
+                            </button>
+                        </div>
+                        <h3 class="mt-3 text-lg font-semibold text-gray-800">Barbacoa</h3>
+                        <div class="mt-4">
+                            <h4 class="text-sm font-medium text-gray-600 mb-2">Ingredientes:</h4>
+                            <ul class="text-sm text-gray-600 space-y-1">
+                                
+                                    <li class="flex items-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 text-indigo-500" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                        </svg>
+                                        Carne de res
+                                    </li>
+                                
+                                    <li class="flex items-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 text-indigo-500" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                        </svg>
+                                        Cebolla
+                                    </li>
+                                
+                                    <li class="flex items-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 text-indigo-500" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                        </svg>
+                                        Cilantro
+                                    </li>
+                                
+                                    <li class="flex items-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 text-indigo-500" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                        </svg>
+                                        Limón
+                                    </li>
+                                
+                                    <li class="flex items-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 text-indigo-500" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                        </svg>
+                                        Tortillas
+                                    </li>
+                                
+                                    <li class="flex items-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 text-indigo-500" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                        </svg>
+                                        Sal
+                                    </li>
+                                
+                                    <li class="flex items-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 text-indigo-500" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                        </svg>
+                                        Especias
+                                    </li>
+                                
+                            </ul>
+                        </div>
+                    </div>
+                </div></div>
+                    
+                    <div class="mt-8">
+                        <h3 class="text-xl font-semibold text-gray-700 mb-4">Lista de Compras</h3>
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <div id="shopping-list" class="space-y-2"><div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="item-0" class="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="item-0" class="text-gray-700">Aceite</label>
+                    </div>
+                    <button class="delete-item text-gray-400 hover:text-red-500" data-index="0" data-item="Aceite">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div><div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="item-1" class="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="item-1" class="text-gray-700">Ajo</label>
+                    </div>
+                    <button class="delete-item text-gray-400 hover:text-red-500" data-index="1" data-item="Ajo">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div><div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="item-2" class="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="item-2" class="text-gray-700">Apio</label>
+                    </div>
+                    <button class="delete-item text-gray-400 hover:text-red-500" data-index="2" data-item="Apio">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div><div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="item-3" class="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="item-3" class="text-gray-700">Arroz</label>
+                    </div>
+                    <button class="delete-item text-gray-400 hover:text-red-500" data-index="3" data-item="Arroz">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div><div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="item-4" class="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="item-4" class="text-gray-700">Bistec de res</label>
+                    </div>
+                    <button class="delete-item text-gray-400 hover:text-red-500" data-index="4" data-item="Bistec de res">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div><div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="item-5" class="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="item-5" class="text-gray-700">Calabaza</label>
+                    </div>
+                    <button class="delete-item text-gray-400 hover:text-red-500" data-index="5" data-item="Calabaza">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div><div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="item-6" class="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="item-6" class="text-gray-700">Carne de cerdo</label>
+                    </div>
+                    <button class="delete-item text-gray-400 hover:text-red-500" data-index="6" data-item="Carne de cerdo">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div><div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="item-7" class="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="item-7" class="text-gray-700">Carne de res</label>
+                    </div>
+                    <button class="delete-item text-gray-400 hover:text-red-500" data-index="7" data-item="Carne de res">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div><div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="item-8" class="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="item-8" class="text-gray-700">Cebolla</label>
+                    </div>
+                    <button class="delete-item text-gray-400 hover:text-red-500" data-index="8" data-item="Cebolla">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div><div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="item-9" class="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="item-9" class="text-gray-700">Chile guajillo</label>
+                    </div>
+                    <button class="delete-item text-gray-400 hover:text-red-500" data-index="9" data-item="Chile guajillo">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div><div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="item-10" class="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="item-10" class="text-gray-700">Chile morrón</label>
+                    </div>
+                    <button class="delete-item text-gray-400 hover:text-red-500" data-index="10" data-item="Chile morrón">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div><div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="item-11" class="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="item-11" class="text-gray-700">Cilantro</label>
+                    </div>
+                    <button class="delete-item text-gray-400 hover:text-red-500" data-index="11" data-item="Cilantro">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div><div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="item-12" class="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="item-12" class="text-gray-700">Crema</label>
+                    </div>
+                    <button class="delete-item text-gray-400 hover:text-red-500" data-index="12" data-item="Crema">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div><div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="item-13" class="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="item-13" class="text-gray-700">Especias</label>
+                    </div>
+                    <button class="delete-item text-gray-400 hover:text-red-500" data-index="13" data-item="Especias">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div><div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="item-14" class="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="item-14" class="text-gray-700">Filete de pescado</label>
+                    </div>
+                    <button class="delete-item text-gray-400 hover:text-red-500" data-index="14" data-item="Filete de pescado">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div><div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="item-15" class="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="item-15" class="text-gray-700">Frijoles refritos</label>
+                    </div>
+                    <button class="delete-item text-gray-400 hover:text-red-500" data-index="15" data-item="Frijoles refritos">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div><div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="item-16" class="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="item-16" class="text-gray-700">Harina</label>
+                    </div>
+                    <button class="delete-item text-gray-400 hover:text-red-500" data-index="16" data-item="Harina">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div><div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="item-17" class="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="item-17" class="text-gray-700">Huevo</label>
+                    </div>
+                    <button class="delete-item text-gray-400 hover:text-red-500" data-index="17" data-item="Huevo">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div><div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="item-18" class="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="item-18" class="text-gray-700">Lechuga</label>
+                    </div>
+                    <button class="delete-item text-gray-400 hover:text-red-500" data-index="18" data-item="Lechuga">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div><div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="item-19" class="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="item-19" class="text-gray-700">Limón</label>
+                    </div>
+                    <button class="delete-item text-gray-400 hover:text-red-500" data-index="19" data-item="Limón">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div><div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="item-20" class="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="item-20" class="text-gray-700">Maíz pozolero</label>
+                    </div>
+                    <button class="delete-item text-gray-400 hover:text-red-500" data-index="20" data-item="Maíz pozolero">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div><div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="item-21" class="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="item-21" class="text-gray-700">Orégano</label>
+                    </div>
+                    <button class="delete-item text-gray-400 hover:text-red-500" data-index="21" data-item="Orégano">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div><div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="item-22" class="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="item-22" class="text-gray-700">Pan molido</label>
+                    </div>
+                    <button class="delete-item text-gray-400 hover:text-red-500" data-index="22" data-item="Pan molido">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div><div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="item-23" class="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="item-23" class="text-gray-700">Papa</label>
+                    </div>
+                    <button class="delete-item text-gray-400 hover:text-red-500" data-index="23" data-item="Papa">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div><div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="item-24" class="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="item-24" class="text-gray-700">Papas</label>
+                    </div>
+                    <button class="delete-item text-gray-400 hover:text-red-500" data-index="24" data-item="Papas">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div><div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="item-25" class="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="item-25" class="text-gray-700">Pimienta</label>
+                    </div>
+                    <button class="delete-item text-gray-400 hover:text-red-500" data-index="25" data-item="Pimienta">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div><div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="item-26" class="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="item-26" class="text-gray-700">Pollo</label>
+                    </div>
+                    <button class="delete-item text-gray-400 hover:text-red-500" data-index="26" data-item="Pollo">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div><div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="item-27" class="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="item-27" class="text-gray-700">Pollo desmenuzado</label>
+                    </div>
+                    <button class="delete-item text-gray-400 hover:text-red-500" data-index="27" data-item="Pollo desmenuzado">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div><div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="item-28" class="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="item-28" class="text-gray-700">Queso</label>
+                    </div>
+                    <button class="delete-item text-gray-400 hover:text-red-500" data-index="28" data-item="Queso">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div><div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="item-29" class="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="item-29" class="text-gray-700">Rábano</label>
+                    </div>
+                    <button class="delete-item text-gray-400 hover:text-red-500" data-index="29" data-item="Rábano">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div><div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="item-30" class="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="item-30" class="text-gray-700">Sal</label>
+                    </div>
+                    <button class="delete-item text-gray-400 hover:text-red-500" data-index="30" data-item="Sal">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div><div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="item-31" class="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="item-31" class="text-gray-700">Salsa</label>
+                    </div>
+                    <button class="delete-item text-gray-400 hover:text-red-500" data-index="31" data-item="Salsa">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div><div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="item-32" class="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="item-32" class="text-gray-700">Salsa verde</label>
+                    </div>
+                    <button class="delete-item text-gray-400 hover:text-red-500" data-index="32" data-item="Salsa verde">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div><div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="item-33" class="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="item-33" class="text-gray-700">Tomate</label>
+                    </div>
+                    <button class="delete-item text-gray-400 hover:text-red-500" data-index="33" data-item="Tomate">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div><div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="item-34" class="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="item-34" class="text-gray-700">Tortillas</label>
+                    </div>
+                    <button class="delete-item text-gray-400 hover:text-red-500" data-index="34" data-item="Tortillas">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div><div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="item-35" class="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="item-35" class="text-gray-700">Tortillas de maíz</label>
+                    </div>
+                    <button class="delete-item text-gray-400 hover:text-red-500" data-index="35" data-item="Tortillas de maíz">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div><div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="item-36" class="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="item-36" class="text-gray-700">Zanahoria</label>
+                    </div>
+                    <button class="delete-item text-gray-400 hover:text-red-500" data-index="36" data-item="Zanahoria">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div></div>
+                            <div class="mt-4 flex">
+                                <input type="text" id="new-item" placeholder="Añadir ingrediente..." class="flex-grow px-4 py-2 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                <button id="add-item-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-r-lg">Añadir</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Vista de calendario completo -->
+            <div id="calendar-view" class="">
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800">Calendario Semanal</h2>
+                        <button id="add-meal-calendar-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd"></path>
+                            </svg>
+                            Añadir Comida
+                        </button>
+                    </div>
+
+                    <!-- Leyenda de tipos de comida -->
+                    <div class="meal-legend">
+                        <div class="legend-item">
+                            <span class="meal-type-indicator meal-type-desayuno"></span>
+                            <span>Desayuno</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="meal-type-indicator meal-type-almuerzo"></span>
+                            <span>Almuerzo</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="meal-type-indicator meal-type-cena"></span>
+                            <span>Cena</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="meal-type-indicator meal-type-merienda"></span>
+                            <span>Merienda</span>
+                        </div>
+                    </div>
+                    
+                    <div class="calendar-grid">
+                        <!-- Encabezados de los días -->
+                        <div class="calendar-header">Lunes</div>
+                        <div class="calendar-header">Martes</div>
+                        <div class="calendar-header">Miércoles</div>
+                        <div class="calendar-header">Jueves</div>
+                        <div class="calendar-header">Viernes</div>
+                        <div class="calendar-header">Sábado</div>
+                        <div class="calendar-header">Domingo</div>
+                        
+                        <!-- Celdas del calendario -->
+                        <div id="lunes-cell" class="calendar-day"><div class="calendar-meal desayuno p-2 mb-2 bg-white rounded-lg shadow-sm text-sm" title="Tortillas de maíz, Salsa verde, Pollo desmenuzado, Queso, Crema, Cebolla, Cilantro">
+                        <div class="flex justify-between items-start">
+                            <span class="font-medium">☕ Chilaquiles</span>
+                            <button class="delete-calendar-meal text-gray-400 hover:text-red-500" data-day="lunes" data-index="0">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">
+                            Tortillas de maíz, Salsa verde...
+                        </div>
+                    </div><div class="calendar-meal almuerzo p-2 mb-2 bg-white rounded-lg shadow-sm text-sm" title="Carne de res, Arroz, Papas, Cebolla, Zanahoria, Apio, Cilantro, Ajo, Sal, Pimienta">
+                        <div class="flex justify-between items-start">
+                            <span class="font-medium">🍽️ Caldo con carne arroz y papas</span>
+                            <button class="delete-calendar-meal text-gray-400 hover:text-red-500" data-day="lunes" data-index="1">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">
+                            Carne de res, Arroz...
+                        </div>
+                    </div></div>
+                        <div id="martes-cell" class="calendar-day"><div class="calendar-meal desayuno p-2 mb-2 bg-white rounded-lg shadow-sm text-sm" title="Tortillas de maíz, Tomate, Cebolla, Ajo, Queso, Crema, Frijoles refritos">
+                        <div class="flex justify-between items-start">
+                            <span class="font-medium">☕ Entomatadas y frijoles</span>
+                            <button class="delete-calendar-meal text-gray-400 hover:text-red-500" data-day="martes" data-index="0">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">
+                            Tortillas de maíz, Tomate...
+                        </div>
+                    </div><div class="calendar-meal cena p-2 mb-2 bg-white rounded-lg shadow-sm text-sm" title="Bistec de res, Tomate, Cebolla, Chile morrón, Ajo, Cilantro, Sal, Pimienta">
+                        <div class="flex justify-between items-start">
+                            <span class="font-medium">🌙 Bistec ranchero</span>
+                            <button class="delete-calendar-meal text-gray-400 hover:text-red-500" data-day="martes" data-index="1">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">
+                            Bistec de res, Tomate...
+                        </div>
+                    </div></div>
+                        <div id="miercoles-cell" class="calendar-day"><div class="calendar-meal almuerzo p-2 mb-2 bg-white rounded-lg shadow-sm text-sm" title="Pollo, Zanahoria, Calabaza, Papa, Apio, Cebolla, Ajo, Cilantro, Sal, Pimienta">
+                        <div class="flex justify-between items-start">
+                            <span class="font-medium">🍽️ Sopa con pollo y verduras</span>
+                            <button class="delete-calendar-meal text-gray-400 hover:text-red-500" data-day="miercoles" data-index="0">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">
+                            Pollo, Zanahoria...
+                        </div>
+                    </div></div>
+                        <div id="jueves-cell" class="calendar-day"><div class="calendar-meal cena p-2 mb-2 bg-white rounded-lg shadow-sm text-sm" title="Filete de pescado, Harina, Huevo, Pan molido, Limón, Sal, Pimienta, Aceite">
+                        <div class="flex justify-between items-start">
+                            <span class="font-medium">🌙 Pescado empanizado</span>
+                            <button class="delete-calendar-meal text-gray-400 hover:text-red-500" data-day="jueves" data-index="0">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">
+                            Filete de pescado, Harina...
+                        </div>
+                    </div></div>
+                        <div id="viernes-cell" class="calendar-day"><div class="calendar-meal almuerzo p-2 mb-2 bg-white rounded-lg shadow-sm text-sm" title="Maíz pozolero, Carne de cerdo, Chile guajillo, Lechuga, Rábano, Cebolla, Limón, Orégano">
+                        <div class="flex justify-between items-start">
+                            <span class="font-medium">🍽️ Pozole</span>
+                            <button class="delete-calendar-meal text-gray-400 hover:text-red-500" data-day="viernes" data-index="0">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">
+                            Maíz pozolero, Carne de cerdo...
+                        </div>
+                    </div></div>
+                        <div id="sabado-cell" class="calendar-day"><div class="calendar-meal cena p-2 mb-2 bg-white rounded-lg shadow-sm text-sm" title="Tortillas de maíz, Pollo desmenuzado, Papa, Lechuga, Crema, Queso, Salsa, Aceite">
+                        <div class="flex justify-between items-start">
+                            <span class="font-medium">🌙 Tacos dorados</span>
+                            <button class="delete-calendar-meal text-gray-400 hover:text-red-500" data-day="sabado" data-index="0">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">
+                            Tortillas de maíz, Pollo desmenuzado...
+                        </div>
+                    </div></div>
+                        <div id="domingo-cell" class="calendar-day"><div class="calendar-meal almuerzo p-2 mb-2 bg-white rounded-lg shadow-sm text-sm" title="Carne de res, Cebolla, Cilantro, Limón, Tortillas, Sal, Especias">
+                        <div class="flex justify-between items-start">
+                            <span class="font-medium">🍽️ Barbacoa</span>
+                            <button class="delete-calendar-meal text-gray-400 hover:text-red-500" data-day="domingo" data-index="0">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">
+                            Carne de res, Cebolla...
+                        </div>
+                    </div></div>
+                    </div>
+
+                    <div class="mt-8">
+                        <h3 class="text-xl font-semibold text-gray-700 mb-4">Lista de Compras</h3>
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <div id="shopping-list-calendar" class="space-y-2"><div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="item-calendar-0" class="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="item-calendar-0" class="text-gray-700">Aceite</label>
+                    </div>
+                    <button class="delete-item-calendar text-gray-400 hover:text-red-500" data-index="0" data-item="Aceite">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div><div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="item-calendar-1" class="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="item-calendar-1" class="text-gray-700">Ajo</label>
+                    </div>
+                    <button class="delete-item-calendar text-gray-400 hover:text-red-500" data-index="1" data-item="Ajo">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div><div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="item-calendar-2" class="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="item-calendar-2" class="text-gray-700">Apio</label>
+                    </div>
+                    <button class="delete-item-calendar text-gray-400 hover:text-red-500" data-index="2" data-item="Apio">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div><div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="item-calendar-3" class="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="item-calendar-3" class="text-gray-700">Arroz</label>
+                    </div>
+                    <button class="delete-item-calendar text-gray-400 hover:text-red-500" data-index="3" data-item="Arroz">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div><div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="item-calendar-4" class="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="item-calendar-4" class="text-gray-700">Bistec de res</label>
+                    </div>
+                    <button class="delete-item-calendar text-gray-400 hover:text-red-500" data-index="4" data-item="Bistec de res">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div><div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="item-calendar-5" class="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="item-calendar-5" class="text-gray-700">Calabaza</label>
+                    </div>
+                    <button class="delete-item-calendar text-gray-400 hover:text-red-500" data-index="5" data-item="Calabaza">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div><div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="item-calendar-6" class="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="item-calendar-6" class="text-gray-700">Carne de cerdo</label>
+                    </div>
+                    <button class="delete-item-calendar text-gray-400 hover:text-red-500" data-index="6" data-item="Carne de cerdo">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div><div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="item-calendar-7" class="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="item-calendar-7" class="text-gray-700">Carne de res</label>
+                    </div>
+                    <button class="delete-item-calendar text-gray-400 hover:text-red-500" data-index="7" data-item="Carne de res">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div><div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="item-calendar-8" class="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="item-calendar-8" class="text-gray-700">Cebolla</label>
+                    </div>
+                    <button class="delete-item-calendar text-gray-400 hover:text-red-500" data-index="8" data-item="Cebolla">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div><div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="item-calendar-9" class="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="item-calendar-9" class="text-gray-700">Chile guajillo</label>
+                    </div>
+                    <button class="delete-item-calendar text-gray-400 hover:text-red-500" data-index="9" data-item="Chile guajillo">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div><div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="item-calendar-10" class="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="item-calendar-10" class="text-gray-700">Chile morrón</label>
+                    </div>
+                    <button class="delete-item-calendar text-gray-400 hover:text-red-500" data-index="10" data-item="Chile morrón">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div><div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="item-calendar-11" class="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="item-calendar-11" class="text-gray-700">Cilantro</label>
+                    </div>
+                    <button class="delete-item-calendar text-gray-400 hover:text-red-500" data-index="11" data-item="Cilantro">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div><div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="item-calendar-12" class="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="item-calendar-12" class="text-gray-700">Crema</label>
+                    </div>
+                    <button class="delete-item-calendar text-gray-400 hover:text-red-500" data-index="12" data-item="Crema">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div><div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="item-calendar-13" class="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="item-calendar-13" class="text-gray-700">Especias</label>
+                    </div>
+                    <button class="delete-item-calendar text-gray-400 hover:text-red-500" data-index="13" data-item="Especias">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div><div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="item-calendar-14" class="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="item-calendar-14" class="text-gray-700">Filete de pescado</label>
+                    </div>
+                    <button class="delete-item-calendar text-gray-400 hover:text-red-500" data-index="14" data-item="Filete de pescado">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div><div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="item-calendar-15" class="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="item-calendar-15" class="text-gray-700">Frijoles refritos</label>
+                    </div>
+                    <button class="delete-item-calendar text-gray-400 hover:text-red-500" data-index="15" data-item="Frijoles refritos">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div><div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="item-calendar-16" class="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="item-calendar-16" class="text-gray-700">Harina</label>
+                    </div>
+                    <button class="delete-item-calendar text-gray-400 hover:text-red-500" data-index="16" data-item="Harina">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div><div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="item-calendar-17" class="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="item-calendar-17" class="text-gray-700">Huevo</label>
+                    </div>
+                    <button class="delete-item-calendar text-gray-400 hover:text-red-500" data-index="17" data-item="Huevo">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div><div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="item-calendar-18" class="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="item-calendar-18" class="text-gray-700">Lechuga</label>
+                    </div>
+                    <button class="delete-item-calendar text-gray-400 hover:text-red-500" data-index="18" data-item="Lechuga">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div><div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="item-calendar-19" class="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="item-calendar-19" class="text-gray-700">Limón</label>
+                    </div>
+                    <button class="delete-item-calendar text-gray-400 hover:text-red-500" data-index="19" data-item="Limón">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div><div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="item-calendar-20" class="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="item-calendar-20" class="text-gray-700">Maíz pozolero</label>
+                    </div>
+                    <button class="delete-item-calendar text-gray-400 hover:text-red-500" data-index="20" data-item="Maíz pozolero">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div><div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="item-calendar-21" class="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="item-calendar-21" class="text-gray-700">Orégano</label>
+                    </div>
+                    <button class="delete-item-calendar text-gray-400 hover:text-red-500" data-index="21" data-item="Orégano">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div><div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="item-calendar-22" class="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="item-calendar-22" class="text-gray-700">Pan molido</label>
+                    </div>
+                    <button class="delete-item-calendar text-gray-400 hover:text-red-500" data-index="22" data-item="Pan molido">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div><div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="item-calendar-23" class="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="item-calendar-23" class="text-gray-700">Papa</label>
+                    </div>
+                    <button class="delete-item-calendar text-gray-400 hover:text-red-500" data-index="23" data-item="Papa">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div><div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="item-calendar-24" class="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="item-calendar-24" class="text-gray-700">Papas</label>
+                    </div>
+                    <button class="delete-item-calendar text-gray-400 hover:text-red-500" data-index="24" data-item="Papas">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div><div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="item-calendar-25" class="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="item-calendar-25" class="text-gray-700">Pimienta</label>
+                    </div>
+                    <button class="delete-item-calendar text-gray-400 hover:text-red-500" data-index="25" data-item="Pimienta">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div><div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="item-calendar-26" class="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="item-calendar-26" class="text-gray-700">Pollo</label>
+                    </div>
+                    <button class="delete-item-calendar text-gray-400 hover:text-red-500" data-index="26" data-item="Pollo">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div><div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="item-calendar-27" class="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="item-calendar-27" class="text-gray-700">Pollo desmenuzado</label>
+                    </div>
+                    <button class="delete-item-calendar text-gray-400 hover:text-red-500" data-index="27" data-item="Pollo desmenuzado">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div><div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="item-calendar-28" class="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="item-calendar-28" class="text-gray-700">Queso</label>
+                    </div>
+                    <button class="delete-item-calendar text-gray-400 hover:text-red-500" data-index="28" data-item="Queso">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div><div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="item-calendar-29" class="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="item-calendar-29" class="text-gray-700">Rábano</label>
+                    </div>
+                    <button class="delete-item-calendar text-gray-400 hover:text-red-500" data-index="29" data-item="Rábano">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div><div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="item-calendar-30" class="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="item-calendar-30" class="text-gray-700">Sal</label>
+                    </div>
+                    <button class="delete-item-calendar text-gray-400 hover:text-red-500" data-index="30" data-item="Sal">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div><div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="item-calendar-31" class="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="item-calendar-31" class="text-gray-700">Salsa</label>
+                    </div>
+                    <button class="delete-item-calendar text-gray-400 hover:text-red-500" data-index="31" data-item="Salsa">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div><div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="item-calendar-32" class="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="item-calendar-32" class="text-gray-700">Salsa verde</label>
+                    </div>
+                    <button class="delete-item-calendar text-gray-400 hover:text-red-500" data-index="32" data-item="Salsa verde">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div><div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="item-calendar-33" class="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="item-calendar-33" class="text-gray-700">Tomate</label>
+                    </div>
+                    <button class="delete-item-calendar text-gray-400 hover:text-red-500" data-index="33" data-item="Tomate">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div><div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="item-calendar-34" class="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="item-calendar-34" class="text-gray-700">Tortillas</label>
+                    </div>
+                    <button class="delete-item-calendar text-gray-400 hover:text-red-500" data-index="34" data-item="Tortillas">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div><div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="item-calendar-35" class="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="item-calendar-35" class="text-gray-700">Tortillas de maíz</label>
+                    </div>
+                    <button class="delete-item-calendar text-gray-400 hover:text-red-500" data-index="35" data-item="Tortillas de maíz">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div><div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="item-calendar-36" class="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="item-calendar-36" class="text-gray-700">Zanahoria</label>
+                    </div>
+                    <button class="delete-item-calendar text-gray-400 hover:text-red-500" data-index="36" data-item="Zanahoria">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div></div>
+                            <div class="mt-4 flex">
+                                <input type="text" id="new-item-calendar" placeholder="Añadir ingrediente..." class="flex-grow px-4 py-2 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                <button id="add-item-btn-calendar" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-r-lg">Añadir</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        <!-- Modal para añadir comida -->
+        <div id="add-meal-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+            <div class="bg-white rounded-xl p-6 w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold text-gray-800">Añadir Nueva Comida</h3>
+                    <button id="close-modal" class="text-gray-500 hover:text-gray-700">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                
+                <div class="flex flex-col md:flex-row gap-6 flex-grow overflow-hidden">
+                    <!-- Lista de recetas predefinidas -->
+                    <div class="w-full md:w-1/2 overflow-hidden flex flex-col">
+                        <h4 class="font-medium text-gray-700 mb-2">Recetas Disponibles</h4>
+                        <div class="relative">
+                            <input type="text" id="recipe-search" placeholder="Buscar receta..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 mb-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 absolute right-3 top-2.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                        </div>
+                        <div class="recipes-container overflow-y-auto flex-grow border border-gray-200 rounded-lg p-2" style="max-height: 400px;">
+                            <ul id="recipes-list" class="divide-y divide-gray-200">
+                                <!-- Las recetas se generarán dinámicamente aquí -->
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <!-- Formulario para añadir comida -->
+                    <div class="w-full md:w-1/2">
+                        <form id="add-meal-form" class="h-full flex flex-col">
+                            <div class="mb-4">
+                                <label for="meal-day" class="block text-gray-700 font-medium mb-2">Día</label>
+                                <select id="meal-day" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                    <option value="lunes">Lunes</option>
+                                    <option value="martes">Martes</option>
+                                    <option value="miercoles">Miércoles</option>
+                                    <option value="jueves">Jueves</option>
+                                    <option value="viernes">Viernes</option>
+                                    <option value="sabado">Sábado</option>
+                                    <option value="domingo">Domingo</option>
+                                </select>
+                            </div>
+                            <div class="mb-4">
+                                <label for="meal-type" class="block text-gray-700 font-medium mb-2">Tipo de Comida</label>
+                                <select id="meal-type" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                    <option value="desayuno">Desayuno</option>
+                                    <option value="almuerzo">Almuerzo</option>
+                                    <option value="cena">Cena</option>
+                                    <option value="merienda">Merienda</option>
+                                </select>
+                            </div>
+                            <div class="mb-4">
+                                <label for="meal-name" class="block text-gray-700 font-medium mb-2">Nombre del Plato</label>
+                                <input type="text" id="meal-name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Ej: Ensalada César">
+                            </div>
+                            <div class="mb-4 flex-grow">
+                                <label for="meal-ingredients" class="block text-gray-700 font-medium mb-2">Ingredientes (separados por coma)</label>
+                                <textarea id="meal-ingredients" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 h-32" placeholder="Ej: Lechuga, pollo, pan tostado, queso parmesano"></textarea>
+                            </div>
+                            <div class="flex justify-end">
+                                <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg">Guardar</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Recetas predefinidas
+        const predefinedRecipes = [
+            { 
+                name: "Caldo con carne arroz y papas", 
+                type: "almuerzo", 
+                ingredients: ["Carne de res", "Arroz", "Papas", "Cebolla", "Zanahoria", "Apio", "Cilantro", "Ajo", "Sal", "Pimienta"] 
+            },
+            { 
+                name: "Tortitas de papa", 
+                type: "almuerzo", 
+                ingredients: ["Papas", "Huevo", "Harina", "Cebolla", "Cilantro", "Sal", "Pimienta", "Aceite"] 
+            },
+            { 
+                name: "Frijol cocido con queso y arroz blanco", 
+                type: "almuerzo", 
+                ingredients: ["Frijoles", "Queso", "Arroz blanco", "Cebolla", "Ajo", "Cilantro", "Sal"] 
+            },
+            { 
+                name: "Chuletas de puerco", 
+                type: "cena", 
+                ingredients: ["Chuletas de cerdo", "Ajo", "Cebolla", "Chile morrón", "Sal", "Pimienta", "Aceite de oliva"] 
+            },
+            { 
+                name: "Bistec ranchero", 
+                type: "cena", 
+                ingredients: ["Bistec de res", "Tomate", "Cebolla", "Chile morrón", "Ajo", "Cilantro", "Sal", "Pimienta"] 
+            },
+            { 
+                name: "Pollo frito y sopa en caldo", 
+                type: "almuerzo", 
+                ingredients: ["Pollo", "Harina", "Huevo", "Pan molido", "Sal", "Pimienta", "Aceite", "Caldo de pollo", "Verduras surtidas"] 
+            },
+            { 
+                name: "Ensalada de pollo", 
+                type: "almuerzo", 
+                ingredients: ["Pollo cocido", "Lechuga", "Tomate", "Aguacate", "Pepino", "Cebolla", "Zanahoria", "Aderezo"] 
+            },
+            { 
+                name: "Chop suey de pollo y arroz blanco", 
+                type: "cena", 
+                ingredients: ["Pollo", "Arroz blanco", "Brócoli", "Zanahoria", "Cebolla", "Chile morrón", "Col", "Salsa de soya", "Aceite de sésamo"] 
+            },
+            { 
+                name: "Cocido", 
+                type: "almuerzo", 
+                ingredients: ["Carne de res", "Elote", "Zanahoria", "Papa", "Calabaza", "Repollo", "Cilantro", "Cebolla", "Ajo", "Sal"] 
+            },
+            { 
+                name: "Repollo con carne y salsa china / arroz blanco", 
+                type: "cena", 
+                ingredients: ["Repollo", "Carne molida", "Arroz blanco", "Salsa de soya", "Jengibre", "Ajo", "Cebolla", "Aceite de sésamo"] 
+            },
+            { 
+                name: "Spaghetti con carne molida", 
+                type: "cena", 
+                ingredients: ["Spaghetti", "Carne molida", "Tomate", "Cebolla", "Ajo", "Albahaca", "Queso parmesano", "Sal", "Pimienta"] 
+            },
+            { 
+                name: "Pechuga de pollo asada con puré de papa", 
+                type: "cena", 
+                ingredients: ["Pechuga de pollo", "Papas", "Mantequilla", "Leche", "Ajo", "Sal", "Pimienta", "Hierbas aromáticas"] 
+            },
+            { 
+                name: "Sopa con pollo y verduras", 
+                type: "almuerzo", 
+                ingredients: ["Pollo", "Zanahoria", "Calabaza", "Papa", "Apio", "Cebolla", "Ajo", "Cilantro", "Sal", "Pimienta"] 
+            },
+            { 
+                name: "Albóndigas", 
+                type: "almuerzo", 
+                ingredients: ["Carne molida", "Pan rallado", "Huevo", "Cebolla", "Ajo", "Perejil", "Tomate", "Sal", "Pimienta"] 
+            },
+            { 
+                name: "Picadillo", 
+                type: "almuerzo", 
+                ingredients: ["Carne molida", "Papa", "Zanahoria", "Chícharos", "Cebolla", "Ajo", "Tomate", "Sal", "Pimienta"] 
+            },
+            { 
+                name: "Caldo de papas y queso", 
+                type: "almuerzo", 
+                ingredients: ["Papas", "Queso", "Cebolla", "Ajo", "Cilantro", "Leche", "Sal", "Pimienta"] 
+            },
+            { 
+                name: "Ensalada de atún con limón", 
+                type: "almuerzo", 
+                ingredients: ["Atún en agua", "Limón", "Lechuga", "Tomate", "Cebolla", "Aguacate", "Pepino", "Sal", "Pimienta"] 
+            },
+            { 
+                name: "Carne molida con papas", 
+                type: "cena", 
+                ingredients: ["Carne molida", "Papas", "Cebolla", "Ajo", "Tomate", "Chile morrón", "Sal", "Pimienta"] 
+            },
+            { 
+                name: "Chilaquiles", 
+                type: "desayuno", 
+                ingredients: ["Tortillas de maíz", "Salsa roja o verde", "Pollo desmenuzado", "Queso", "Crema", "Cebolla", "Cilantro"] 
+            },
+            { 
+                name: "Gallina pinta", 
+                type: "almuerzo", 
+                ingredients: ["Frijoles", "Carne de res", "Elote", "Cilantro", "Cebolla", "Ajo", "Sal", "Pimienta"] 
+            },
+            { 
+                name: "Pescado empanizado", 
+                type: "cena", 
+                ingredients: ["Filete de pescado", "Harina", "Huevo", "Pan molido", "Limón", "Sal", "Pimienta", "Aceite"] 
+            },
+            { 
+                name: "Ceviche de pescado", 
+                type: "almuerzo", 
+                ingredients: ["Pescado blanco", "Limón", "Tomate", "Cebolla", "Chile serrano", "Cilantro", "Aguacate", "Sal", "Pimienta"] 
+            },
+            { 
+                name: "Pescado frito (deditos)", 
+                type: "cena", 
+                ingredients: ["Filete de pescado", "Harina", "Sal", "Pimienta", "Limón", "Aceite"] 
+            },
+            { 
+                name: "Quesadillas", 
+                type: "cena", 
+                ingredients: ["Tortillas de harina", "Queso", "Aguacate", "Salsa"] 
+            },
+            { 
+                name: "Entomatadas y frijoles", 
+                type: "desayuno", 
+                ingredients: ["Tortillas de maíz", "Tomate", "Cebolla", "Ajo", "Queso", "Crema", "Frijoles refritos"] 
+            },
+            { 
+                name: "Tacos dorados", 
+                type: "cena", 
+                ingredients: ["Tortillas de maíz", "Pollo desmenuzado", "Papa", "Lechuga", "Crema", "Queso", "Salsa", "Aceite"] 
+            },
+            { 
+                name: "Barbacoa", 
+                type: "almuerzo", 
+                ingredients: ["Carne de res", "Cebolla", "Cilantro", "Limón", "Tortillas", "Sal", "Especias"] 
+            },
+            { 
+                name: "Tacos aguados", 
+                type: "almuerzo", 
+                ingredients: ["Tortillas de maíz", "Carne guisada", "Caldo", "Cebolla", "Cilantro", "Limón", "Salsa"] 
+            },
+            { 
+                name: "Tacos de lengua", 
+                type: "almuerzo", 
+                ingredients: ["Lengua de res", "Cebolla", "Cilantro", "Limón", "Tortillas", "Salsa"] 
+            },
+            { 
+                name: "Cazuela", 
+                type: "almuerzo", 
+                ingredients: ["Carne de res", "Verduras mixtas", "Papas", "Cebolla", "Ajo", "Tomate", "Sal", "Pimienta"] 
+            },
+            { 
+                name: "Pozole", 
+                type: "almuerzo", 
+                ingredients: ["Maíz pozolero", "Carne de cerdo", "Chile guajillo", "Lechuga", "Rábano", "Cebolla", "Limón", "Orégano"] 
+            },
+            { 
+                name: "Pollo empanizado y arroz", 
+                type: "cena", 
+                ingredients: ["Pechuga de pollo", "Harina", "Huevo", "Pan molido", "Arroz", "Sal", "Pimienta", "Aceite"] 
+            }
+        ];
+        
+        // Verduras y frutas disponibles
+        const vegetables = ["Lechuga", "Tomate", "Aguacate", "Pepino", "Cebolla", "Chile morrón", "Apio", "Zanahoria", "Coliflor", "Brócoli", "Elote", "Calabaza", "Espárragos", "Cilantro", "Perejil", "Chile verde"];
+        
+        const fruits = ["Pera", "Manzana", "Jícama", "Plátano", "Fresas", "Cerezas", "Uvas", "Sandía", "Piña", "Papaya", "Naranja", "Melón", "Toronja", "Kiwi"];
+        
+        // Datos de ejemplo para inicializar
+        const weekData = {
+            lunes: [
+                { type: 'desayuno', name: 'Chilaquiles', ingredients: ['Tortillas de maíz', 'Salsa verde', 'Pollo desmenuzado', 'Queso', 'Crema', 'Cebolla', 'Cilantro'] },
+                { type: 'almuerzo', name: 'Caldo con carne arroz y papas', ingredients: ['Carne de res', 'Arroz', 'Papas', 'Cebolla', 'Zanahoria', 'Apio', 'Cilantro', 'Ajo', 'Sal', 'Pimienta'] }
+            ],
+            martes: [
+                { type: 'desayuno', name: 'Entomatadas y frijoles', ingredients: ['Tortillas de maíz', 'Tomate', 'Cebolla', 'Ajo', 'Queso', 'Crema', 'Frijoles refritos'] },
+                { type: 'cena', name: 'Bistec ranchero', ingredients: ['Bistec de res', 'Tomate', 'Cebolla', 'Chile morrón', 'Ajo', 'Cilantro', 'Sal', 'Pimienta'] }
+            ],
+            miercoles: [
+                { type: 'almuerzo', name: 'Sopa con pollo y verduras', ingredients: ['Pollo', 'Zanahoria', 'Calabaza', 'Papa', 'Apio', 'Cebolla', 'Ajo', 'Cilantro', 'Sal', 'Pimienta'] }
+            ],
+            jueves: [
+                { type: 'cena', name: 'Pescado empanizado', ingredients: ['Filete de pescado', 'Harina', 'Huevo', 'Pan molido', 'Limón', 'Sal', 'Pimienta', 'Aceite'] }
+            ],
+            viernes: [
+                { type: 'almuerzo', name: 'Pozole', ingredients: ['Maíz pozolero', 'Carne de cerdo', 'Chile guajillo', 'Lechuga', 'Rábano', 'Cebolla', 'Limón', 'Orégano'] }
+            ],
+            sabado: [
+                { type: 'cena', name: 'Tacos dorados', ingredients: ['Tortillas de maíz', 'Pollo desmenuzado', 'Papa', 'Lechuga', 'Crema', 'Queso', 'Salsa', 'Aceite'] }
+            ],
+            domingo: [
+                { type: 'almuerzo', name: 'Barbacoa', ingredients: ['Carne de res', 'Cebolla', 'Cilantro', 'Limón', 'Tortillas', 'Sal', 'Especias'] }
+            ]
+        };
+        
+        // Lista de compras inicial basada en las comidas predefinidas
+        let shoppingList = [];
+        
+        // Recopilar todos los ingredientes de las comidas iniciales
+        Object.values(weekData).forEach(dayMeals => {
+            dayMeals.forEach(meal => {
+                meal.ingredients.forEach(ingredient => {
+                    if (!shoppingList.includes(ingredient)) {
+                        shoppingList.push(ingredient);
+                    }
+                });
+            });
+        });
+        
+        // Variables globales
+        let currentDay = 'lunes';
+        let currentView = 'detailed'; // 'detailed' o 'calendar'
+        
+        // Elementos DOM
+        const dayTabs = document.querySelectorAll('.day-tab');
+        const currentDayTitle = document.getElementById('current-day');
+        const mealsContainer = document.getElementById('meals-container');
+        const shoppingListContainer = document.getElementById('shopping-list');
+        const shoppingListCalendarContainer = document.getElementById('shopping-list-calendar');
+        const addMealBtn = document.getElementById('add-meal-btn');
+        const addMealCalendarBtn = document.getElementById('add-meal-calendar-btn');
+        const addMealModal = document.getElementById('add-meal-modal');
+        const closeModalBtn = document.getElementById('close-modal');
+        const addMealForm = document.getElementById('add-meal-form');
+        const newItemInput = document.getElementById('new-item');
+        const newItemCalendarInput = document.getElementById('new-item-calendar');
+        const addItemBtn = document.getElementById('add-item-btn');
+        const addItemCalendarBtn = document.getElementById('add-item-btn-calendar');
+        const recipesList = document.getElementById('recipes-list');
+        const recipeSearch = document.getElementById('recipe-search');
+        const viewToggleBtn = document.getElementById('view-toggle-btn');
+        const detailedView = document.getElementById('detailed-view');
+        const calendarView = document.getElementById('calendar-view');
+        
+        // Funciones
+        function renderMeals() {
+            mealsContainer.innerHTML = '';
+            
+            if (weekData[currentDay].length === 0) {
+                mealsContainer.innerHTML = `
+                    <div class="col-span-full text-center py-8">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        <p class="mt-2 text-gray-500">No hay comidas planificadas para este día</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            weekData[currentDay].forEach((meal, index) => {
+                const mealCard = document.createElement('div');
+                mealCard.className = 'meal-card bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden';
+                
+                let mealIcon = '';
+                let mealColor = '';
+                
+                switch(meal.type) {
+                    case 'desayuno':
+                        mealIcon = '☕';
+                        mealColor = 'bg-yellow-100 text-yellow-800';
+                        break;
+                    case 'almuerzo':
+                        mealIcon = '🍽️';
+                        mealColor = 'bg-green-100 text-green-800';
+                        break;
+                    case 'cena':
+                        mealIcon = '🌙';
+                        mealColor = 'bg-blue-100 text-blue-800';
+                        break;
+                    case 'merienda':
+                        mealIcon = '🍎';
+                        mealColor = 'bg-red-100 text-red-800';
+                        break;
+                }
+                
+                mealCard.innerHTML = `
+                    <div class="p-5">
+                        <div class="flex justify-between items-start">
+                            <span class="${mealColor} text-xs font-medium px-2.5 py-0.5 rounded-full flex items-center">
+                                ${mealIcon} ${meal.type.charAt(0).toUpperCase() + meal.type.slice(1)}
+                            </span>
+                            <button class="delete-meal text-gray-400 hover:text-red-500" data-index="${index}">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                </svg>
+                            </button>
+                        </div>
+                        <h3 class="mt-3 text-lg font-semibold text-gray-800">${meal.name}</h3>
+                        <div class="mt-4">
+                            <h4 class="text-sm font-medium text-gray-600 mb-2">Ingredientes:</h4>
+                            <ul class="text-sm text-gray-600 space-y-1">
+                                ${meal.ingredients.map(ingredient => `
+                                    <li class="flex items-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 text-indigo-500" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                                        </svg>
+                                        ${ingredient}
+                                    </li>
+                                `).join('')}
+                            </ul>
+                        </div>
+                    </div>
+                `;
+                
+                mealsContainer.appendChild(mealCard);
+            });
+            
+            // Añadir event listeners a los botones de eliminar
+            document.querySelectorAll('.delete-meal').forEach(button => {
+                button.addEventListener('click', function() {
+                    const index = parseInt(this.getAttribute('data-index'));
+                    weekData[currentDay].splice(index, 1);
+                    renderMeals();
+                    updateShoppingList();
+                    renderCalendar();
+                });
+            });
+        }
+        
+        function renderShoppingList() {
+            shoppingListContainer.innerHTML = '';
+            shoppingListCalendarContainer.innerHTML = '';
+            
+            if (shoppingList.length === 0) {
+                shoppingListContainer.innerHTML = '<p class="text-gray-500">No hay ingredientes en la lista de compras</p>';
+                shoppingListCalendarContainer.innerHTML = '<p class="text-gray-500">No hay ingredientes en la lista de compras</p>';
+                return;
+            }
+            
+            // Ordenar la lista alfabéticamente
+            const sortedList = [...shoppingList].sort();
+            
+            sortedList.forEach((item, index) => {
+                // Para la vista detallada
+                const itemElement = document.createElement('div');
+                itemElement.className = 'flex items-center justify-between';
+                itemElement.innerHTML = `
+                    <div class="flex items-center">
+                        <input type="checkbox" id="item-${index}" class="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="item-${index}" class="text-gray-700">${item}</label>
+                    </div>
+                    <button class="delete-item text-gray-400 hover:text-red-500" data-index="${index}" data-item="${item}">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                `;
+                
+                shoppingListContainer.appendChild(itemElement);
+                
+                // Para la vista de calendario
+                const itemCalendarElement = document.createElement('div');
+                itemCalendarElement.className = 'flex items-center justify-between';
+                itemCalendarElement.innerHTML = `
+                    <div class="flex items-center">
+                        <input type="checkbox" id="item-calendar-${index}" class="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="item-calendar-${index}" class="text-gray-700">${item}</label>
+                    </div>
+                    <button class="delete-item-calendar text-gray-400 hover:text-red-500" data-index="${index}" data-item="${item}">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                `;
+                
+                shoppingListCalendarContainer.appendChild(itemCalendarElement);
+            });
+            
+            // Añadir event listeners a los botones de eliminar (vista detallada)
+            document.querySelectorAll('.delete-item').forEach(button => {
+                button.addEventListener('click', function() {
+                    const item = this.getAttribute('data-item');
+                    const index = shoppingList.indexOf(item);
+                    if (index !== -1) {
+                        shoppingList.splice(index, 1);
+                        renderShoppingList();
+                    }
+                });
+            });
+            
+            // Añadir event listeners a los botones de eliminar (vista calendario)
+            document.querySelectorAll('.delete-item-calendar').forEach(button => {
+                button.addEventListener('click', function() {
+                    const item = this.getAttribute('data-item');
+                    const index = shoppingList.indexOf(item);
+                    if (index !== -1) {
+                        shoppingList.splice(index, 1);
+                        renderShoppingList();
+                    }
+                });
+            });
+            
+            // Añadir event listeners a los checkboxes (vista detallada)
+            document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    const label = this.nextElementSibling;
+                    if (this.checked) {
+                        label.classList.add('line-through', 'text-gray-400');
+                    } else {
+                        label.classList.remove('line-through', 'text-gray-400');
+                    }
+                });
+            });
+            
+            // Añadir event listeners a los checkboxes (vista calendario)
+            document.querySelectorAll('input[id^="item-calendar-"]').forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    const label = this.nextElementSibling;
+                    if (this.checked) {
+                        label.classList.add('line-through', 'text-gray-400');
+                    } else {
+                        label.classList.remove('line-through', 'text-gray-400');
+                    }
+                });
+            });
+        }
+        
+        function renderRecipesList(searchTerm = '') {
+            recipesList.innerHTML = '';
+            
+            const filteredRecipes = searchTerm 
+                ? predefinedRecipes.filter(recipe => 
+                    recipe.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    recipe.ingredients.some(ingredient => ingredient.toLowerCase().includes(searchTerm.toLowerCase()))
+                )
+                : predefinedRecipes;
+            
+            if (filteredRecipes.length === 0) {
+                recipesList.innerHTML = '<li class="py-3 px-2 text-gray-500">No se encontraron recetas</li>';
+                return;
+            }
+            
+            filteredRecipes.forEach(recipe => {
+                const recipeItem = document.createElement('li');
+                recipeItem.className = 'recipe-item py-3 px-2 rounded-lg';
+                recipeItem.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h5 class="font-medium text-gray-800">${recipe.name}</h5>
+                            <p class="text-xs text-gray-500 mt-1">${recipe.ingredients.slice(0, 3).join(', ')}${recipe.ingredients.length > 3 ? '...' : ''}</p>
+                        </div>
+                        <span class="text-xs ${
+                            recipe.type === 'desayuno' ? 'bg-yellow-100 text-yellow-800' : 
+                            recipe.type === 'almuerzo' ? 'bg-green-100 text-green-800' : 
+                            recipe.type === 'cena' ? 'bg-blue-100 text-blue-800' : 
+                            'bg-red-100 text-red-800'
+                        } px-2 py-0.5 rounded-full">
+                            ${recipe.type.charAt(0).toUpperCase() + recipe.type.slice(1)}
+                        </span>
+                    </div>
+                `;
+                
+                recipeItem.addEventListener('click', function() {
+                    document.getElementById('meal-type').value = recipe.type;
+                    document.getElementById('meal-name').value = recipe.name;
+                    document.getElementById('meal-ingredients').value = recipe.ingredients.join(', ');
+                });
+                
+                recipesList.appendChild(recipeItem);
+            });
+        }
+        
+        function updateShoppingList() {
+            // Crear un conjunto de todos los ingredientes necesarios
+            const allIngredients = new Set();
+            
+            // Recopilar ingredientes de todas las comidas
+            Object.values(weekData).forEach(dayMeals => {
+                dayMeals.forEach(meal => {
+                    meal.ingredients.forEach(ingredient => {
+                        allIngredients.add(ingredient);
+                    });
+                });
+            });
+            
+            // Actualizar la lista de compras
+            shoppingList = Array.from(allIngredients);
+            renderShoppingList();
+        }
+        
+        function renderCalendar() {
+            // Limpiar todas las celdas del calendario
+            const days = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo'];
+            days.forEach(day => {
+                const cell = document.getElementById(`${day}-cell`);
+                cell.innerHTML = '';
+                
+                // Si no hay comidas para este día
+                if (weekData[day].length === 0) {
+                    cell.innerHTML = `
+                        <div class="text-center py-4">
+                            <p class="text-sm text-gray-500">Sin comidas</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Ordenar las comidas por tipo
+                const sortedMeals = [...weekData[day]].sort((a, b) => {
+                    const order = { 'desayuno': 1, 'almuerzo': 2, 'merienda': 3, 'cena': 4 };
+                    return order[a.type] - order[b.type];
+                });
+                
+                // Añadir cada comida a la celda
+                sortedMeals.forEach((meal, index) => {
+                    const mealElement = document.createElement('div');
+                    mealElement.className = `calendar-meal ${meal.type} p-2 mb-2 bg-white rounded-lg shadow-sm text-sm`;
+                    
+                    let mealIcon = '';
+                    switch(meal.type) {
+                        case 'desayuno': mealIcon = '☕'; break;
+                        case 'almuerzo': mealIcon = '🍽️'; break;
+                        case 'cena': mealIcon = '🌙'; break;
+                        case 'merienda': mealIcon = '🍎'; break;
+                    }
+                    
+                    mealElement.innerHTML = `
+                        <div class="flex justify-between items-start">
+                            <span class="font-medium">${mealIcon} ${meal.name}</span>
+                            <button class="delete-calendar-meal text-gray-400 hover:text-red-500" data-day="${day}" data-index="${index}">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">
+                            ${meal.ingredients.slice(0, 2).join(', ')}${meal.ingredients.length > 2 ? '...' : ''}
+                        </div>
+                    `;
+                    
+                    // Añadir tooltip para mostrar todos los ingredientes
+                    mealElement.title = meal.ingredients.join(', ');
+                    
+                    cell.appendChild(mealElement);
+                });
+            });
+            
+            // Añadir event listeners a los botones de eliminar
+            document.querySelectorAll('.delete-calendar-meal').forEach(button => {
+                button.addEventListener('click', function() {
+                    const day = this.getAttribute('data-day');
+                    const index = parseInt(this.getAttribute('data-index'));
+                    weekData[day].splice(index, 1);
+                    renderCalendar();
+                    if (day === currentDay) {
+                        renderMeals();
+                    }
+                    updateShoppingList();
+                });
+            });
+        }
+        
+        function toggleView() {
+            if (currentView === 'detailed') {
+                currentView = 'calendar';
+                detailedView.classList.add('hidden');
+                calendarView.classList.remove('hidden');
+                viewToggleBtn.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                    </svg>
+                    Ver Vista Detallada
+                `;
+                renderCalendar();
+            } else {
+                currentView = 'detailed';
+                calendarView.classList.add('hidden');
+                detailedView.classList.remove('hidden');
+                viewToggleBtn.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M5 4a1 1 0 00-1 1v10a1 1 0 001 1h10a1 1 0 001-1V5a1 1 0 00-1-1H5zm0 2h10v8H5V6z" clip-rule="evenodd" />
+                    </svg>
+                    Ver Calendario Completo
+                `;
+            }
+        }
+        
+        // Event Listeners
+        dayTabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                dayTabs.forEach(t => t.classList.remove('active'));
+                dayTabs.forEach(t => t.classList.add('bg-gray-200'));
+                this.classList.add('active');
+                this.classList.remove('bg-gray-200');
+                
+                currentDay = this.getAttribute('data-day');
+                currentDayTitle.textContent = currentDay.charAt(0).toUpperCase() + currentDay.slice(1);
+                renderMeals();
+            });
+        });
+        
+        addMealBtn.addEventListener('click', function() {
+            document.getElementById('meal-day').value = currentDay;
+            addMealModal.classList.remove('hidden');
+            renderRecipesList();
+        });
+        
+        addMealCalendarBtn.addEventListener('click', function() {
+            addMealModal.classList.remove('hidden');
+            renderRecipesList();
+        });
+        
+        closeModalBtn.addEventListener('click', function() {
+            addMealModal.classList.add('hidden');
+        });
+        
+        addMealForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const mealDay = document.getElementById('meal-day').value;
+            const mealType = document.getElementById('meal-type').value;
+            const mealName = document.getElementById('meal-name').value;
+            const mealIngredients = document.getElementById('meal-ingredients').value.split(',').map(item => item.trim()).filter(item => item);
+            
+            if (mealName && mealIngredients.length > 0) {
+                weekData[mealDay].push({
+                    type: mealType,
+                    name: mealName,
+                    ingredients: mealIngredients
+                });
+                
+                // Añadir ingredientes a la lista de compras si no existen
+                mealIngredients.forEach(ingredient => {
+                    if (!shoppingList.includes(ingredient)) {
+                        shoppingList.push(ingredient);
+                    }
+                });
+                
+                if (mealDay === currentDay) {
+                    renderMeals();
+                }
+                renderShoppingList();
+                renderCalendar();
+                addMealModal.classList.add('hidden');
+                addMealForm.reset();
+            }
+        });
+        
+        addItemBtn.addEventListener('click', function() {
+            const newItem = newItemInput.value.trim();
+            if (newItem && !shoppingList.includes(newItem)) {
+                shoppingList.push(newItem);
+                renderShoppingList();
+                newItemInput.value = '';
+            }
+        });
+        
+        addItemCalendarBtn.addEventListener('click', function() {
+            const newItem = newItemCalendarInput.value.trim();
+            if (newItem && !shoppingList.includes(newItem)) {
+                shoppingList.push(newItem);
+                renderShoppingList();
+                newItemCalendarInput.value = '';
+            }
+        });
+        
+        newItemInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addItemBtn.click();
+            }
+        });
+        
+        newItemCalendarInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addItemCalendarBtn.click();
+            }
+        });
+        
+        recipeSearch.addEventListener('input', function() {
+            renderRecipesList(this.value);
+        });
+        
+        viewToggleBtn.addEventListener('click', toggleView);
+        
+        // Inicializar la aplicación
+        renderMeals();
+        renderShoppingList();
+        renderCalendar();
+        
+        // Cerrar modal al hacer clic fuera de él
+        window.addEventListener('click', function(e) {
+            if (e.target === addMealModal) {
+                addMealModal.classList.add('hidden');
+            }
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'942fb2da766f574f',t:'MTc0Nzc4NDYzMS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><iframe height="1" width="1" style="position: absolute; top: 0px; left: 0px; border: none; visibility: hidden;"></iframe>
+
+</body></html>
